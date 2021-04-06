@@ -38,15 +38,32 @@ const User = () => {
   return <div>User: {contextValue.appState.user.name}</div>;
 };
 
+/**
+ * 规范state创建流程：  基于旧state生成新state的处理函数
+ */
+const reducer = (state, { type, payload }) => {
+  if (type === "updateState") {
+    return {
+      ...state,
+      user: {
+        ...state.user,
+        ...payload,
+      },
+    };
+  }
+  return state;
+};
+
 const UserModifier = () => {
   const { appState, setAppState } = useContext(appContext);
 
   const onChange = (e) => {
-    const temp = { ...appState };
-
-    temp.user.name = e.target.value;
-
-    setAppState(temp);
+    setAppState(
+      reducer(appState, {
+        type: "updateState",
+        payload: { name: e.target.value },
+      })
+    );
   };
 
   return (
