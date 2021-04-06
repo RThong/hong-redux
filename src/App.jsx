@@ -30,21 +30,40 @@ const 二儿子 = () => {
   );
 };
 
-const 幺儿子 = () => {
+const 幺儿子 = connect((state) => {
+  return {
+    group: state.group,
+  };
+})((props) => {
   console.log("【幺儿子 执行】", Math.random());
-  return <section>幺儿子</section>;
-};
-
-const User = connect((props) => {
-  console.log("【User 执行】", Math.random());
-  const { state } = props;
-  return <div>User: {state.user.name}</div>;
+  const { group } = props;
+  return (
+    <section>
+      幺儿子
+      <div>{group.name}</div>
+      {/* <div>{props.group.name}</div> */}
+    </section>
+  );
 });
 
-const UserModifier = connect((props) => {
+const User = connect((state) => {
+  return {
+    user: state.user,
+  };
+})((props) => {
+  console.log("【User 执行】", Math.random());
+  const { user } = props;
+  return <div>User: {user.name}</div>;
+});
+
+const UserModifier = connect((state) => {
+  return {
+    user: state.user,
+  };
+})((props) => {
   console.log("【UserModifier 执行】", Math.random());
 
-  const { state, dispatch } = props;
+  const { user, dispatch } = props;
   const onChange = (e) => {
     dispatch({
       type: "updateState",
@@ -54,7 +73,7 @@ const UserModifier = connect((props) => {
 
   return (
     <div>
-      <input value={state.user.name} onChange={onChange} />
+      <input value={user.name} onChange={onChange} />
     </div>
   );
 });
