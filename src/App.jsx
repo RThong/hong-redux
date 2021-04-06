@@ -27,7 +27,7 @@ const 大儿子 = () => (
 const 二儿子 = () => (
   <section>
     二儿子
-    <UserModifier />
+    <Wrapper></Wrapper>
   </section>
 );
 
@@ -54,21 +54,31 @@ const reducer = (state, { type, payload }) => {
   return state;
 };
 
-const UserModifier = () => {
+/**
+ * 规范setState的流程：  基于高阶组件来向下传递state和dispatch
+ */
+const Wrapper = () => {
   const { appState, setAppState } = useContext(appContext);
 
+  const dispatch = (action) => {
+    setAppState(reducer(appState, action));
+  };
+
+  return <UserModifier dispatch={dispatch} state={appState}></UserModifier>;
+};
+
+const UserModifier = (props) => {
+  const { state, dispatch } = props;
   const onChange = (e) => {
-    setAppState(
-      reducer(appState, {
-        type: "updateState",
-        payload: { name: e.target.value },
-      })
-    );
+    dispatch({
+      type: "updateState",
+      payload: { name: e.target.value },
+    });
   };
 
   return (
     <div>
-      <input value={appState.user.name} onChange={onChange} />
+      <input value={state.user.name} onChange={onChange} />
     </div>
   );
 };
