@@ -1,67 +1,68 @@
-import React, {useContext, useEffect, useState} from 'react'
+import React, { useState, useContext, useEffect } from "react";
 
-const store = {
-  state: undefined,
-  reducer: undefined,
-  setState(newState) {
-    store.state = newState
-    store.listeners.map(fn => fn(store.state))
+// 统一将state保存在外部而不是作为顶级组件的state   避免全部子组件render
+export const store = {
+  state: {
+    user: { name: "hong", age: 18 },
+  },
+  setState: (newVal) => {
+    store.state = newVal;
+    store.listeners.forEach((fn) => {
+      fn(store.state);
+    });
   },
   listeners: [],
+  // 订阅state的变动
   subscribe(fn) {
-    store.listeners.push(fn)
+    store.listeners.push(fn);
+
     return () => {
-      const index = store.listeners.indexOf(fn)
-      store.listeners.splice(index, 1)
-    }
+      const index = store.listeners.indexOf(fn);
+
+      store.listeners.splice(index, 1);
+    };
+  },
+};
+
+export const appContext = React.createContext(null);
+
+/**
+ * 规范state创建流程：  基于旧state生成新state的处理函数
+ */
+export const reducer = (state, { type, payload }) => {
+  if (type === "updateState") {
+    return {
+      ...state,
+      user: {
+        ...state.user,
+        ...payload,
+      },
+    };
   }
-}
+  return state;
+};
 
-export const createStore = (reducer, initState) => {
-  store.state = initState
-  store.reducer = reducer
-  return store
-}
+/**
+ * connect：  连接组件与全局状态
+ */
+export const connect = (Component) => {
+  /**
+   * 规范setState的流程：  基于高阶组件来向下传递state和dispatch
+   */
+  return (props) => {
+    const { state, setState, subscribe } = useContext(appContext);
 
-const changed = (oldState, newState) => {
-  let changed = false
-  for (let key in oldState) {
-    if (oldState[key] !== newState[key]) {
-      changed = true
-    }
-  }
-  return changed
-}
+    const update = useState({})[1];
 
-export const connect = (selector, dispatchSelector) => (Component) => {
-  const Wrapper = (props) => {
+    // 订阅state变更去更新组件   只在connect连接全局state的组件进行render
+    useEffect(() => {
+      subscribe(() => update({}));
+    }, [subscribe]);
+
     const dispatch = (action) => {
-      setState(store.reducer(state, action))
-    }
-    const {state, setState} = useContext(appContext)
+      setState(reducer(state, action));
+    };
 
-    const data = selector ? selector(state) : {state}
-    const dispatchers = dispatchSelector ? dispatchSelector(dispatch) : {dispatch}
-
-    const [, update] = useState({})
-    useEffect(() => store.subscribe(() => {
-      const newData = selector ? selector(store.state) : {state: store.state}
-      if (changed(data, newData)) {
-        update({})
-      }
-    }), [selector])
-
-    return <Component {...props} {...data} {...dispatchers}/>
-  }
-  return Wrapper
-}
-
-export const appContext = React.createContext(null)
-
-export const Provider = ({store, children}) => {
-  return (
-    <appContext.Provider value={store}>
-      {children}
-    </appContext.Provider>
-  )
-}
+    return <Component {...props} dispatch={dispatch} state={state} />;
+  };
+};

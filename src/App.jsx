@@ -1,78 +1,49 @@
-import React, { useState, useContext } from "react";
-
-const appContext = React.createContext(null);
+import React from "react";
+import { store, connect, appContext } from "./redux";
 
 export const App = () => {
-  const [appState, setAppState] = useState({
-    user: { name: "hong", age: 18 },
-  });
-
-  const contextValue = { appState, setAppState };
-
   return (
-    <appContext.Provider value={contextValue}>
+    <appContext.Provider value={store}>
       <大儿子 />
       <二儿子 />
       <幺儿子 />
     </appContext.Provider>
   );
 };
-const 大儿子 = () => (
-  <section>
-    大儿子
-    <User />
-  </section>
-);
-
-const 二儿子 = () => (
-  <section>
-    二儿子
-    <UserModifier></UserModifier>
-  </section>
-);
-
-const 幺儿子 = () => <section>幺儿子</section>;
-
-const User = () => {
-  const contextValue = useContext(appContext);
-  return <div>User: {contextValue.appState.user.name}</div>;
+const 大儿子 = () => {
+  console.log("【大儿子 执行】", Math.random());
+  return (
+    <section>
+      大儿子
+      <User />
+    </section>
+  );
 };
 
-/**
- * 规范state创建流程：  基于旧state生成新state的处理函数
- */
-const reducer = (state, { type, payload }) => {
-  if (type === "updateState") {
-    return {
-      ...state,
-      user: {
-        ...state.user,
-        ...payload,
-      },
-    };
-  }
-  return state;
+const 二儿子 = () => {
+  console.log("【二儿子 执行】", Math.random());
+  return (
+    <section>
+      二儿子
+      <UserModifier></UserModifier>
+    </section>
+  );
 };
 
-/**
- * connect：  连接组件与全局状态
- */
-const connect = (Component) => {
-  /**
-   * 规范setState的流程：  基于高阶组件来向下传递state和dispatch
-   */
-  return (props) => {
-    const { appState, setAppState } = useContext(appContext);
-
-    const dispatch = (action) => {
-      setAppState(reducer(appState, action));
-    };
-
-    return <Component {...props} dispatch={dispatch} state={appState} />;
-  };
+const 幺儿子 = () => {
+  console.log("【幺儿子 执行】", Math.random());
+  return <section>幺儿子</section>;
 };
+
+const User = connect((props) => {
+  console.log("【User 执行】", Math.random());
+  const { state } = props;
+  return <div>User: {state.user.name}</div>;
+});
 
 const UserModifier = connect((props) => {
+  console.log("【UserModifier 执行】", Math.random());
+
   const { state, dispatch } = props;
   const onChange = (e) => {
     dispatch({
