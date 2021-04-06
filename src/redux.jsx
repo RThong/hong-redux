@@ -59,8 +59,11 @@ const isChange = (newVal, oldVal) => {
 
 /**
  * connect：  连接组件与全局状态
- * selector:  组件中需要的state发生变更才去重新render
- * mapDispatchToProps:  组件中具体操作state的函数
+ * selector:  封装读取state  组件中需要的state发生变更才去重新render
+ * mapDispatchToProps: 封装写state的方法    组件中具体操作state的函数
+ *
+ * connect设计成这种形式  就是为了能够最大程度复用selector/mapDispatchToProps/
+ * 以及connectToUser = connect(selector, dispatchSelector)这样的半成品
  */
 export const connect = (selector, mapDispatchToProps) => (Component) => {
   /**

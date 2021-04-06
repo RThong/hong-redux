@@ -1,5 +1,6 @@
 import React from "react";
 import { store, connect, appContext } from "./redux";
+import connectToUser from "./connectors/connectToUser";
 
 export const App = () => {
   return (
@@ -46,32 +47,13 @@ const 幺儿子 = connect((state) => {
   );
 });
 
-const User = connect((state) => {
-  return {
-    user: state.user,
-  };
-})((props) => {
+const User = connectToUser((props) => {
   console.log("【User 执行】", Math.random());
   const { user } = props;
   return <div>User: {user.name}</div>;
 });
 
-const UserModifier = connect(
-  (state) => {
-    return {
-      user: state.user,
-    };
-  },
-  (dispatch) => {
-    return {
-      updateUser: (val) =>
-        dispatch({
-          type: "updateState",
-          payload: val,
-        }),
-    };
-  }
-)((props) => {
+const UserModifier = connectToUser((props) => {
   console.log("【UserModifier 执行】", Math.random());
 
   const { user, updateUser } = props;
