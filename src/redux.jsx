@@ -60,15 +60,24 @@ const isChange = (newVal, oldVal) => {
 /**
  * connect：  连接组件与全局状态
  * selector:  组件中需要的state发生变更才去重新render
+ * mapDispatchToProps:  组件中具体操作state的函数
  */
-export const connect = (selector) => (Component) => {
+export const connect = (selector, mapDispatchToProps) => (Component) => {
   /**
    * 规范setState的流程：  基于高阶组件来向下传递state和dispatch
    */
   return (props) => {
+    const dispatch = (action) => {
+      store.setState(reducer(store.state, action));
+    };
+
     const update = useState({})[1];
 
     const data = selector ? selector(store.state) : store.state;
+
+    const dispatchSelector = mapDispatchToProps
+      ? mapDispatchToProps(dispatch)
+      : { dispatch };
 
     // 订阅state变更去更新组件   只在connect连接全局state的组件进行render
     useEffect(() => {
@@ -86,10 +95,6 @@ export const connect = (selector) => (Component) => {
       };
     }, [selector]);
 
-    const dispatch = (action) => {
-      store.setState(reducer(store.state, action));
-    };
-
-    return <Component {...props} {...data} dispatch={dispatch} />;
+    return <Component {...props} {...data} {...dispatchSelector} />;
   };
 };
