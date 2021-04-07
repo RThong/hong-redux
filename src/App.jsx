@@ -1,14 +1,36 @@
 import React from "react";
-import { store, connect, appContext } from "./redux";
+import { createStore, connect, Provider } from "./redux";
 import connectToUser from "./connectors/connectToUser";
+
+const initialState = {
+  user: { name: "hong", age: 18 },
+  group: { name: "前端组" },
+};
+
+const reducer = (state, { type, payload }) => {
+  if (type === "updateState") {
+    return {
+      ...state,
+      user: {
+        ...state.user,
+        ...payload,
+      },
+    };
+  }
+  return state;
+};
+
+const store = createStore(reducer, initialState);
 
 export const App = () => {
   return (
-    <appContext.Provider value={store}>
-      <大儿子 />
-      <二儿子 />
-      <幺儿子 />
-    </appContext.Provider>
+    <>
+      <Provider store={store}>
+        <大儿子 />
+        <二儿子 />
+        <幺儿子 />
+      </Provider>
+    </>
   );
 };
 const 大儿子 = () => {
