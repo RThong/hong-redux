@@ -15,21 +15,13 @@ const isChange = (newVal, oldVal) => {
   return changed;
 };
 
-const useSelector = (selector, mapDispatchToProps) => {
+const useSelector = (selector) => {
   // 这里直接从store对象去取值的话，那使用处包裹Provider就没有意义
-  const { state, setState, reducer, subscribe } = useContext(appContext);
-
-  const dispatch = (action) => {
-    setState(reducer(state, action));
-  };
+  const { state, subscribe } = useContext(appContext);
 
   const update = useState({})[1];
 
   const data = selector ? selector(state) : state;
-
-  const dispatchSelector = mapDispatchToProps
-    ? mapDispatchToProps(dispatch)
-    : { dispatch };
 
   // 订阅state变更去更新组件   只在connect连接全局state的组件进行render
   useEffect(() => {
